@@ -317,11 +317,11 @@ pub mod nws
 	{
 		debug!("get_location \"{}\"",key);
 
-		let rl = get_element(pjson, "relativeLocation");
+		let rl = get_object(pjson, "relativeLocation");
 		if *rl != Value::Null
 		{
 				debug!("got relativeLocation:\n{}", rl);
-				let p2 = get_element(rl, "properties");
+				let p2 = get_object(rl, "properties");
 				if *p2 != Value::Null
 				{
 					debug!("got second properties:\n{}", p2);
@@ -387,7 +387,7 @@ pub mod nws
 		return empty
 	}
 
-	pub fn get_element<'a,'b>(json:&'a serde_json::Value, key:&'b str) -> &'a serde_json::Value
+	pub fn get_object<'a,'b>(json:&'a serde_json::Value, key:&'b str) -> &'a serde_json::Value
 	{
 		if *json != Value::Null
 		{
@@ -395,7 +395,7 @@ pub mod nws
 		}
 		return &Value::Null
 	}
-	pub fn get_indexed_element<'a,'b>(json:&'a serde_json::Value,key:&'b str,index:usize) -> &'a serde_json::Value
+	pub fn get_indexed_object<'a,'b>(json:&'a serde_json::Value,key:&'b str,index:usize) -> &'a serde_json::Value
 	{
 		if *json != Value::Null
 		{
@@ -406,12 +406,43 @@ pub mod nws
 
 	pub fn get_features_properties(prop:&serde_json::Value,index:usize) -> &serde_json::Value
 	{
-		let features = get_indexed_element(prop,"features",index);
+		let features = get_indexed_object(prop,"features",index);
 		if *features != Value::Null
 		{
-			return &features["properties"];
+			//return &features["properties"];
+			return get_object(features,"properties");
 		}
 		return &Value::Null
+	}
+
+	pub fn get_properties_value_key(json:&serde_json::Value, sub:&str, key:&str) -> String
+	{
+		let empty = String::from("");
+		let pprop = get_object(json,"properties");
+		if *pprop != Value::Null
+		{
+			return get_key(get_object(pprop,sub),key)
+		}
+		else
+		{
+			debug!("get_properties_value pprop is null");
+		}
+		return empty;
+	}
+
+	pub fn get_properties_key(json:&serde_json::Value, key:&str) -> String
+	{
+		let empty = String::from("");
+		let pprop = get_object(json,"properties");
+		if *pprop != Value::Null
+		{
+			return get_key(pprop,key)
+		}
+		else
+		{
+			debug!("get_properties_value pprop is null");
+		}
+		return empty;
 	}
 
 	pub fn get_features_properties_key(prop:&serde_json::Value,index:usize, key:&str) -> String
@@ -432,7 +463,7 @@ pub mod nws
 
 		//let features:&Value = &prop["features"];
 
-		let s1 = get_indexed_element(prop,"features",index);
+		let s1 = get_indexed_object(prop,"features",index);
 		if *s1 != Value::Null
 		{
 			return get_key(s1,key)
